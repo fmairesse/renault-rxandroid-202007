@@ -6,6 +6,7 @@ import io.reactivex.rxjava3.core.ObservableEmitter
 import io.reactivex.rxjava3.core.ObservableOnSubscribe
 import io.reactivex.rxjava3.core.Observer
 import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.functions.Consumer
 import org.junit.Test
 import kotlin.concurrent.thread
 
@@ -93,5 +94,10 @@ class RxUnitTest {
         observable.subscribe(observer)
 
         Thread.sleep(300)
+    }
+
+    @Test
+    fun `tp2#1`() {
+        Observable.just("hello", "world").subscribe(::println)
     }
 }
