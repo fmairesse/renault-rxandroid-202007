@@ -7,6 +7,7 @@ import io.reactivex.rxjava3.core.ObservableOnSubscribe
 import io.reactivex.rxjava3.core.Observer
 import io.reactivex.rxjava3.disposables.Disposable
 import org.junit.Test
+import kotlin.concurrent.thread
 
 
 class LogObserver<T> : Observer<T> {
@@ -60,5 +61,37 @@ class RxUnitTest {
 
         // Abonner l'observer
         observable.subscribe(observer)
+    }
+
+    @Test
+    fun `tp1#3`() {
+        // Créer l'observable
+        val observable = Observable.create(
+            ObservableOnSubscribe<String> { observer ->
+                thread(name = "monThread") {
+                    // afficher thread courant
+                    println("Subscribing in thread ${Thread.currentThread()}")
+
+                    // envoyer des événements à observer
+                    observer.onNext("hello")
+
+                    // attendre ...
+                    Thread.sleep(200)
+
+                    observer.onNext("world")
+
+                    // terminer
+                    observer.onComplete()
+                }
+            })
+        println("je suis dans le thread ${Thread.currentThread()}")
+
+        // Creér l'observer
+        val observer = LogObserver<String>()
+
+        // Abonner l'observer
+        observable.subscribe(observer)
+
+        Thread.sleep(300)
     }
 }
