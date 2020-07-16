@@ -6,8 +6,11 @@ import io.reactivex.rxjava3.core.ObservableEmitter
 import io.reactivex.rxjava3.core.ObservableOnSubscribe
 import io.reactivex.rxjava3.core.Observer
 import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.functions.Action
 import io.reactivex.rxjava3.functions.Consumer
+import io.reactivex.rxjava3.internal.functions.Functions
 import org.junit.Test
+import java.lang.RuntimeException
 import kotlin.concurrent.thread
 
 
@@ -99,5 +102,23 @@ class RxUnitTest {
     @Test
     fun `tp2#1`() {
         Observable.just("hello", "world").subscribe(::println)
+    }
+
+    @Test
+    fun `tp2#2`() {
+        Observable.error<String>(RuntimeException("boom")).subscribe(
+            Functions.emptyConsumer(), // Consumer<String> {},
+            Consumer { e -> println("Error: $e") }
+        )
+    }
+
+    @Test
+    fun `tp2#3`() {
+        // Test Observable.empty
+        Observable.empty<String>().subscribe(
+            Functions.emptyConsumer(),
+            Consumer { e -> println("Error: $e") },
+            Action { println("Completed") }
+        )
     }
 }
