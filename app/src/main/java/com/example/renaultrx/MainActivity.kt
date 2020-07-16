@@ -1,34 +1,50 @@
 package com.example.renaultrx
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
+import com.jakewharton.rxbinding4.widget.afterTextChangeEvents
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
+    val LOG_TAG = MainActivity::class.simpleName
+    val subscriptions = CompositeDisposable()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
-        val listView: RecyclerView = findViewById(R.id.listCommunes)
-        // Créer des communes en dur
-        val communes= listOf(
-            CommuneModel("Toulouse", "31555"),
-            CommuneModel("Lille", "59111")
-        )
-
+        // Créer l'adapter permettant de remplir la liste
         val adapter = CommuneItemRecyclerViewAdapter()
-        listView.adapter = adapter
 
-        //...
-        adapter.communes = listOf(
-            CommuneModel("Toulouse", "31555"),
-            CommuneModel("Lille", "59111")
-        )
+        // Appliquer l'adapter à la liste
+        listCommunes.adapter = adapter
+
+        val communesService = CommunesService()
+        // Observer les changements du champ text
+        subscriptions.add(editTextTextCommune.afterTextChangeEvents()
+            // transformer les event de afterTextChangeEvents en String
+            .map { e -> e.editable.toString() }
+            // associer une recherche à chaque terme de recherche émis
+            .flatMap { term -> communesService.search(term) }
+            // Retrofit tourne sur un thread à part
+            // Pour mettre à jour l'UI, il faut le faire sur le thread UI
+            .observeOn(AndroidSchedulers.mainThread())
+            // Mettre à jour l'UI avec la liste de communes reçues
+            .subscribe { result ->
+                adapter.communes = result
+            })
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        subscriptions.clear()
     }
 
     class CommuneViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
