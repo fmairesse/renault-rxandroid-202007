@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>TP1 : 1er observable</title>
+        <style>
+</style>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" integrity="sha384-yFRtMMDnQtDRO8rLpMIKrtPCD5jdktao2TV19YiZYWMDkUR5GQZR/NOVTdquEx1j" crossorigin="anonymous">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        
+        <script src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+        
+    </head>
+    <body class="vscode-light">
+        <h1 id="tp1--1er-observable">TP1 : 1er observable</h1>
+<h2 id="mise-en-place-du-projet">Mise en place du projet</h2>
+<ul>
+<li>Créer un nouveau Android qui servira pour tous les TPs.</li>
+<li>Ajouter la dépendance RxJava au projet: <a href="https://github.com/ReactiveX/RxJava/#getting-started">https://github.com/ReactiveX/RxJava/#getting-started</a></li>
+<li>Ajouter un test unitaire dans lequel faire tourner le Hello World de la doc référencé ci-avant</li>
+</ul>
+<h2 id="classe-logobserver">Classe LogObserver</h2>
+<p>Définir une classe <code>LogObserver</code> implémentant <code>Observer</code> qui écrit dans la console les événements reçus ainsi que le thread courant.</p>
+<h2 id="création-dun-observable-synchrone">Création d'un observable synchrone</h2>
+<p>Dans un nouveau test unitaire:</p>
+<ul>
+<li>Créer une instance d'Observable qui
+<ul>
+<li>affiche le thread courant,</li>
+<li>émet un message,</li>
+<li>attend un peu puis se termine</li>
+</ul>
+</li>
+<li>Afficher un message dans la console après l'instanciation de l'observable</li>
+<li>Abonner un <code>LogObserver</code></li>
+<li>Afficher un message dans la console</li>
+</ul>
+<p>Quand s'exécute l'Observable ?</p>
+<h2 id="création-dun-observable-asynchrone">Création d'un observable asynchrone</h2>
+<p>Dans un nouveau test unitaire:</p>
+<ul>
+<li>Faire comme précédemment mais l'Observable fera son traitement dans nouveau thread</li>
+<li>Faire en sorte que l'observer ait le temps d'être appelé en utilisant <code>Thread.sleep</code></li>
+</ul>
+<p>Dans quel thread sont reçus les différents événements ?</p>
+<p>Pour créer un thread avec kotlin:</p>
+<pre><code class="language-kotlin"><div><span class="hljs-keyword">import</span> kotlin.concurrent.thread
+...
+thread(name=<span class="hljs-string">"mythread"</span>) {
+	println(<span class="hljs-string">"Running <span class="hljs-subst">${Thread.currentThread()}</span>"</span>)
+}
+</div></code></pre>
+
+    </body>
+    </html>
