@@ -9,22 +9,25 @@ import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.functions.Action
 import io.reactivex.rxjava3.functions.Consumer
 import io.reactivex.rxjava3.internal.functions.Functions
+import io.reactivex.rxjava3.observers.DisposableObserver
 import org.junit.Test
 import java.lang.RuntimeException
+import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
 
-class LogObserver<T> : Observer<T> {
+class LogObserver<T> : DisposableObserver<T>() {
     override fun onComplete() {
         println("Completed in ${Thread.currentThread()}")
     }
 
-    override fun onSubscribe(d: Disposable?) {
-        println("subscription in ${Thread.currentThread()}")
-    }
+//    override fun onSubscribe(subscription: Disposable?) {
+//        println("subscription in ${Thread.currentThread()}")
+//    }
 
     override fun onNext(t: T) {
         println("Received value $t in ${Thread.currentThread()}")
+
     }
 
     override fun onError(e: Throwable?) {
@@ -80,8 +83,9 @@ class RxUnitTest {
                     observer.onNext("hello")
 
                     // attendre ...
-                    Thread.sleep(200)
+                    Thread.sleep(1000)
 
+                    if (!observer.isDisposed)
                     observer.onNext("world")
 
                     // terminer
@@ -95,8 +99,8 @@ class RxUnitTest {
 
         // Abonner l'observer
         observable.subscribe(observer)
-
         Thread.sleep(300)
+        observer.dispose()
     }
 
     @Test
@@ -115,10 +119,28 @@ class RxUnitTest {
     @Test
     fun `tp2#3`() {
         // Test Observable.empty
-        Observable.empty<String>().subscribe(
+        val subscription = Observable.empty<String>().subscribe(
             Functions.emptyConsumer(),
             Consumer { e -> println("Error: $e") },
             Action { println("Completed") }
         )
+
+        subscription.dispose()
+    }
+
+    fun search(term: String): Observable<String> {
+        return Observable
+            .just("$term: Toulouse")
+            .doOnNext { println("Emmitting $term: Toulouse") }
+            .delay(1, TimeUnit.SECONDS)
+            .doOnDispose { println("Disposing $term: Toulouse") }
+            .doOnComplete{ println("Completing $term: Toulouse") }
+    }
+
+    @Test
+    fun flatMap() {
+        Observable.just("t", "to", "tou")
+            .switchMap { v -> search(v) }
+            .blockingSubscribe({result -> println("Result: $result") })
     }
 }
