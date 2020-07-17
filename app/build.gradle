@@ -59,4 +59,8 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test:rules:1.2.0'
     implementation 'androidx.test.espresso:espresso-idling-resource:3.2.0'
+
+    // DI
+    implementation "org.koin:koin-androidx-scope:2.1.6"
+    androidTestImplementation "org.koin:koin-test:2.1.6"
 }

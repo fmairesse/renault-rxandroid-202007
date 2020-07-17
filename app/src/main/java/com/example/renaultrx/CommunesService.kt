@@ -17,8 +17,12 @@ interface CommunesApi {
   fun search(@Query("nom") nom: String): Observable<List<CommuneModel>>
 }
 
-class CommunesService {
-  private val LOG_TAG = CommunesService::class.simpleName
+interface ICommunesService {
+  fun search(nom: String): Observable<List<CommuneModel>>
+}
+
+class CommunesServiceHttp : ICommunesService {
+  private val LOG_TAG = CommunesServiceHttp::class.simpleName
 
   private val communesApi = Retrofit.Builder()
     .client(
@@ -32,7 +36,7 @@ class CommunesService {
     .build()
     .create(CommunesApi::class.java)
 
-  fun search(nom: String): Observable<List<CommuneModel>> {
+  override fun search(nom: String): Observable<List<CommuneModel>> {
     Log.d(LOG_TAG, "Searching $nom...")
     val time = System.currentTimeMillis()
     return communesApi.search(nom)

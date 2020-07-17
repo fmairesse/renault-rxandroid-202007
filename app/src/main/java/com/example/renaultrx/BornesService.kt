@@ -19,8 +19,12 @@ interface BornesApi {
   fun search(@Query("refine.code_insee") code: String): Observable<BornesResponse>
 }
 
-class BornesService {
-  private val LOG_TAG = BornesService::class.simpleName
+interface IBornesService {
+  fun search(code: String): Observable<BornesResponse>
+}
+
+class BornesServiceHttp : IBornesService {
+  private val LOG_TAG = BornesServiceHttp::class.simpleName
 
   private val bornesApi = Retrofit.Builder()
     .client(
@@ -34,7 +38,7 @@ class BornesService {
     .build()
     .create(BornesApi::class.java)
 
-  fun search(code: String): Observable<BornesResponse> {
+  override fun search(code: String): Observable<BornesResponse> {
     Log.d(LOG_TAG, "Searching $code...")
     val time = System.currentTimeMillis()
     return bornesApi.search(code)

@@ -30,8 +30,8 @@ class MainActivity : AppCompatActivity() {
         // Appliquer l'adapter à la liste
         listCommunes.adapter = adapter
 
-        val communesService = CommunesService()
-        val bornesServices = BornesService()
+        val communesService = CommunesServiceHttp()
+        val bornesServices = BornesServiceHttp()
         // Observer les changements du champ text
         subscriptions.add(editTextTextCommune.afterTextChangeEvents()
             // émettre seulement 300 ms après la dernière saisie de l'utilisateur
