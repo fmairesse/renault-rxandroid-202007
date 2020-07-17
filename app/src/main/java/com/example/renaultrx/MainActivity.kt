@@ -39,25 +39,42 @@ class MainActivity : AppCompatActivity() {
             // Ne laisser passer que les mots de + de 3 caractères
             .filter { text -> text.length > 3 }
             // associer une recherche à chaque terme de recherche émis
-            //
             .switchMap { term ->
                 communesService
                     .search(term)
-                    // renvoyer une liste vide en cas d'erreur réseau
-                    .onErrorReturnItem(listOf<CommuneModel>(
-                            CommuneModel("Mufflins", "1223")))
+                    // renvoyer une liste bidon en cas d'erreur réseau
+                    .onErrorReturnItem(listOf<CommuneModel>(CommuneModel("Mufflins", "1223")))
                     /// renvoyer une liste qui ne dépasse pas 10 éléments
                     // Méthode simple
 //                    .map{l -> l.subList(0, Math.min(l.size, 10))}
                     // Méthode compliquée ...
+                    // Transformer le flux émettant une liste de communes
+                    // en un flux de communes
                     .flatMap { communes -> Observable.fromIterable(communes) }
+                    // Limiter le flux de communes à 3
                     .take(3)
-                    .flatMap({ commune ->
-                        bornesServices.search(commune.code)
-                            .onErrorReturnItem(BornesResponse(-2))
-                            .map{ bornesResponse ->
-                                CommuneModel(commune.nom, commune.code, bornesResponse.nhits)}
-                    }, false, 2)
+                    // Pour chaque commune, lancer une recherche du nombre de bornes
+                    .flatMap(
+                        { commune ->
+                            bornesServices.search(commune.code)
+                                // Renvoyer un nombre de bornes bidon en cas d'erreur
+                                .onErrorReturnItem(BornesResponse(-2))
+                                // Transformer le flux de BornesResponse en un flux
+                                // de CommuneModel dont l'attribut nbBornes = bornesResponse.nhits
+                                .map { bornesResponse ->
+                                    CommuneModel(
+                                        commune.nom,
+                                        commune.code,
+                                        bornesResponse.nhits
+                                    )
+                                }
+                        },
+                        // en cas d'erreur d'une des requetes du nombre de bornes,
+                        // planter immédiatement plutot qu'attendre toutes les requetes
+                        false,
+                        // limiter le nombre de requetes à 2 en parallèle
+                        2
+                    )
                     .toList().toObservable()
             }
             // Retrofit tourne sur un thread à part
