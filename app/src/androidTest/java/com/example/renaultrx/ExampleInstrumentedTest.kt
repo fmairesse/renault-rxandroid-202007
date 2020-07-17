@@ -2,9 +2,11 @@ package com.example.renaultrx
 
 
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
 import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.idling.CountingIdlingResource
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -27,6 +29,13 @@ class ExampleInstrumentedTest {
 
     @Test
     fun testCommunes() {
+        // Créer idlingResource de l'activity
+        val idlingResource = CountingIdlingResource("search resource")
+        activityRule.activity.idlingResource = idlingResource
+
+        // Enregistrer la resource auprès de Espresso
+        IdlingRegistry.getInstance().register(idlingResource)
+
         // Saisir "Toulouse" dans le champ de recherche
         onView(withId(R.id.editTextTextCommune))
             .perform(typeText("Toulouse"), closeSoftKeyboard())

@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
+import androidx.test.espresso.idling.CountingIdlingResource
 import com.jakewharton.rxbinding4.widget.afterTextChangeEvents
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
@@ -17,6 +18,7 @@ import java.util.concurrent.TimeUnit
 class MainActivity : AppCompatActivity() {
     val LOG_TAG = MainActivity::class.simpleName
     val subscriptions = CompositeDisposable()
+    var idlingResource: CountingIdlingResource? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +40,8 @@ class MainActivity : AppCompatActivity() {
             .map { e -> e.editable.toString() }
             // Ne laisser passer que les mots de + de 3 caractères
             .filter { text -> text.length > 3 }
+            // Avertir Espresso qu'un traitement long est en cours
+            .doOnNext{ idlingResource?.increment() }
             // associer une recherche à chaque terme de recherche émis
             .switchMap { term ->
                 communesService
@@ -77,6 +81,7 @@ class MainActivity : AppCompatActivity() {
                     )
                     .toList().toObservable()
             }
+            .doAfterTerminate { idlingResource?.decrement() }
             // Retrofit tourne sur un thread à part
             // Pour mettre à jour l'UI, il faut le faire sur le thread UI
             .observeOn(AndroidSchedulers.mainThread())
