@@ -34,7 +34,8 @@ class ExampleInstrumentedTest {
         activityRule.activity.idlingResource = idlingResource
 
         // Enregistrer la resource auprès de Espresso
-        IdlingRegistry.getInstance().register(idlingResource)
+        // Inutile grâce à Koin
+//        IdlingRegistry.getInstance().register(idlingResource)
 
         // Saisir "Toulouse" dans le champ de recherche
         onView(withId(R.id.editTextTextCommune))
