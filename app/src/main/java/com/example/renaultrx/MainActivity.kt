@@ -11,6 +11,7 @@ import com.jakewharton.rxbinding4.widget.afterTextChangeEvents
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
     val LOG_TAG = MainActivity::class.simpleName
@@ -29,10 +30,28 @@ class MainActivity : AppCompatActivity() {
         val communesService = CommunesService()
         // Observer les changements du champ text
         subscriptions.add(editTextTextCommune.afterTextChangeEvents()
+            // émettre seulement 300 ms après la dernière saisie de l'utilisateur
+            .debounce(300, TimeUnit.MILLISECONDS)
             // transformer les event de afterTextChangeEvents en String
             .map { e -> e.editable.toString() }
+            // Ne laisser passer que les mots de + de 3 caractères
+            .filter { text -> text.length > 3 }
             // associer une recherche à chaque terme de recherche émis
-            .flatMap { term -> communesService.search(term) }
+            //
+            .switchMap { term ->
+                communesService
+                    .search(term)
+                    // renvoyer une liste vide en cas d'erreur réseau
+                    .onErrorReturnItem(listOf<CommuneModel>(
+                            CommuneModel("Mufflins", "1223")))
+                    /// renvoyer une liste qui ne dépasse pas 10 éléments
+                    // Méthode simple
+                    .map{l -> l.subList(0, Math.min(l.size, 10))}
+                    // Méthode compliquée ...
+//                    .flatMap { communes -> Observable.fromIterable(communes) }
+//                    .take(10)
+//                    .toList().toObservable()
+            }
             // Retrofit tourne sur un thread à part
             // Pour mettre à jour l'UI, il faut le faire sur le thread UI
             .observeOn(AndroidSchedulers.mainThread())
