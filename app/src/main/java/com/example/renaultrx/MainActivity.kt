@@ -83,13 +83,13 @@ class MainActivity : AppCompatActivity() {
                     )
                     .toList().toObservable()
             }
-            .doAfterTerminate { idlingResource?.decrement() }
             // Retrofit tourne sur un thread à part
             // Pour mettre à jour l'UI, il faut le faire sur le thread UI
             .observeOn(AndroidSchedulers.mainThread())
             // Mettre à jour l'UI avec la liste de communes reçues
             .subscribe { result ->
                 adapter.communes = result
+                idlingResource?.decrement()
             })
     }
 
