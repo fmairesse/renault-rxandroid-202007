@@ -13,12 +13,17 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
+import org.koin.android.ext.android.inject
 import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
     val LOG_TAG = MainActivity::class.simpleName
     val subscriptions = CompositeDisposable()
     var idlingResource: CountingIdlingResource? = null
+
+    // Injecter les dépendances
+    val communesService: ICommunesService by inject()
+    val bornesServices: IBornesService by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,9 +34,6 @@ class MainActivity : AppCompatActivity() {
 
         // Appliquer l'adapter à la liste
         listCommunes.adapter = adapter
-
-        val communesService = CommunesServiceHttp()
-        val bornesServices = BornesServiceHttp()
         // Observer les changements du champ text
         subscriptions.add(editTextTextCommune.afterTextChangeEvents()
             // émettre seulement 300 ms après la dernière saisie de l'utilisateur
