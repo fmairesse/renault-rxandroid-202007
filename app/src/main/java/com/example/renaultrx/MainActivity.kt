@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxbinding4.widget.afterTextChangeEvents
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.concurrent.TimeUnit
@@ -28,6 +29,7 @@ class MainActivity : AppCompatActivity() {
         listCommunes.adapter = adapter
 
         val communesService = CommunesService()
+        val bornesServices = BornesService()
         // Observer les changements du champ text
         subscriptions.add(editTextTextCommune.afterTextChangeEvents()
             // émettre seulement 300 ms après la dernière saisie de l'utilisateur
@@ -46,11 +48,17 @@ class MainActivity : AppCompatActivity() {
                             CommuneModel("Mufflins", "1223")))
                     /// renvoyer une liste qui ne dépasse pas 10 éléments
                     // Méthode simple
-                    .map{l -> l.subList(0, Math.min(l.size, 10))}
+//                    .map{l -> l.subList(0, Math.min(l.size, 10))}
                     // Méthode compliquée ...
-//                    .flatMap { communes -> Observable.fromIterable(communes) }
-//                    .take(10)
-//                    .toList().toObservable()
+                    .flatMap { communes -> Observable.fromIterable(communes) }
+                    .take(3)
+                    .flatMap({ commune ->
+                        bornesServices.search(commune.code)
+                            .onErrorReturnItem(BornesResponse(-2))
+                            .map{ bornesResponse ->
+                                CommuneModel(commune.nom, commune.code, bornesResponse.nhits)}
+                    }, false, 2)
+                    .toList().toObservable()
             }
             // Retrofit tourne sur un thread à part
             // Pour mettre à jour l'UI, il faut le faire sur le thread UI
